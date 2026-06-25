@@ -1,58 +1,104 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# AmikomEventHub - Pertemuan 10
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Implementasi latihan/tugas modul **PERTEMUAN 10 - Checkout Logic & Transaksi** untuk aplikasi Laravel AmikomEventHub.
 
-## About Laravel
+## Implementasi Plan
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+1. Menyiapkan model transaksi
+   - Menambahkan `$fillable` pada `App\Models\Transaction` agar `Transaction::create()` dapat menyimpan data checkout.
+   - Menambahkan relasi `event()` agar laporan admin bisa menampilkan judul event dari setiap transaksi.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+2. Membuat alur guest checkout
+   - Route `GET /checkout/{event}` menampilkan form checkout untuk tamu.
+   - Route `POST /checkout/{event}` memvalidasi nama, email, dan nomor WhatsApp.
+   - Sistem menolak checkout jika `stock` event bernilai `0` atau kurang.
+   - Sistem membuat `order_id` unik dengan format `TRX-{timestamp}-{random}`.
+   - Sistem menyimpan transaksi dengan status awal `Pending`.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+3. Menghitung total pembayaran dummy
+   - Harga tiket diambil dari `events.price`.
+   - Biaya layanan tetap ditambahkan sebesar `Rp 5.000`.
+   - Total transaksi disimpan pada kolom `total_price`.
 
-## Learning Laravel
+4. Menyiapkan laporan transaksi admin
+   - Route admin `GET /admin/transactions` mengambil transaksi terbaru dengan eager loading relasi `event`.
+   - View admin menampilkan Order ID, detail pembeli, event, tanggal transaksi, status, dan total tagihan.
+   - UI tabel ditingkatkan dengan kartu ringkasan total transaksi, transaksi pending, dan omzet pada halaman aktif.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+5. Menambahkan dokumentasi dan verifikasi
+   - README ini menjelaskan detail pengerjaan.
+   - Feature test ditambahkan untuk membuktikan checkout berhasil dan checkout stok habis ditolak.
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## File Utama
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+- `app/Models/Transaction.php`
+- `app/Http/Controllers/CheckoutController.php`
+- `app/Http/Controllers/Admin/TransactionController.php`
+- `resources/views/checkout/create.blade.php`
+- `resources/views/admin/transactions/index.blade.php`
+- `resources/views/layouts/app.blade.php`
+- `routes/web.php`
+- `tests/Feature/CheckoutTest.php`
 
-## Agentic Development
+## Alur Penggunaan Manual
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+1. Jalankan migrasi dan seeder jika database belum siap:
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+php artisan migrate:fresh --seed
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+2. Jalankan server lokal:
 
-## Contributing
+```bash
+php artisan serve
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+3. Buka halaman event, pilih salah satu event, lalu klik tombol pembelian menuju checkout.
+4. Isi form checkout:
+   - Nama lengkap
+   - Email aktif
+   - Nomor WhatsApp
+5. Klik **Simpan Pesanan**.
+6. Jika stok masih tersedia, sistem mencatat transaksi dan menampilkan pesan sukses di beranda.
+7. Login admin melalui `/admin/login`, lalu buka menu **Laporan Transaksi**.
+8. Pastikan data dummy muncul dengan total `harga tiket + Rp 5.000`.
 
-## Code of Conduct
+## Kredensial Admin Seeder
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```text
+Email: admin@amikom.ac.id
+Password: password
+```
 
-## Security Vulnerabilities
+## Route Terkait
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```php
+Route::get('/checkout/{event}', [CheckoutController::class, 'create'])->name('checkout.create');
+Route::post('/checkout/{event}', [CheckoutController::class, 'store'])->name('checkout.store');
 
-## License
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::middleware(['auth', 'admin'])->group(function () {
+        Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
+    });
+});
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Verifikasi Otomatis
+
+Jalankan:
+
+```bash
+php artisan test --filter=CheckoutTest
+```
+
+Yang diverifikasi:
+
+- Guest checkout valid membuat transaksi `Pending`.
+- `total_price` berisi harga tiket ditambah biaya layanan `Rp 5.000`.
+- `order_id` diawali `TRX-`.
+- Checkout event dengan stok habis ditolak dan tidak membuat transaksi.
+
+## Catatan
+
+Fokus pengerjaan ini adalah Pertemuan 10, sehingga checkout disimpan sebagai transaksi dummy dan belum memakai payment gateway. Integrasi Midtrans masuk ke materi Pertemuan 11.

@@ -14,29 +14,20 @@ use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PartnerController;
 
-/*
-|--------------------------------------------------------------------------
-| User / Public Routes
-|--------------------------------------------------------------------------
-*/
+
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/events/{event}', [EventController::class, 'show'])->name('events.show');
 
-// Checkout & Payment Gateway
+// Checkout
 Route::get('/checkout/{event}', [CheckoutController::class, 'create'])->name('checkout.create');
 Route::post('/checkout/{event}', [CheckoutController::class, 'store'])->name('checkout.store');
 Route::get('/payment/{order_id}', [CheckoutController::class, 'payment'])->name('checkout.payment');
 Route::get('/success/{order_id}', [CheckoutController::class, 'success'])->name('checkout.success');
 
 // Webhook Midtrans
-Route::post('/midtrans/callback', [MidtransWebhookController::class, 'handle']);
+Route::post('/midtrans/callback', [MidtransWebhookController::class, 'handle'])->name('midtrans.callback');
 
-/*
-|--------------------------------------------------------------------------
-| Admin Area Routes (Prefix: admin, Name: admin.*)
-|--------------------------------------------------------------------------
-*/
-// Rute Login (Diletakkan di luar agar namanya tepat 'login' saat ditendang middleware auth)
+
 Route::get('admin/login', [AuthController::class, 'showLogin'])->name('login');
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -57,7 +48,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Laporan Transaksi
         Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
 
-        // CRUD Categories (Sesuai Tugas Modul 6)
+        
         Route::resource('categories', CategoryController::class);
         Route::resource('partners', PartnerController::class);
     });

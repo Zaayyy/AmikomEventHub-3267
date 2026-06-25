@@ -29,7 +29,11 @@
             $heroImage = $closestEvent && $closestEvent->poster_path ? asset('storage/' . $closestEvent->poster_path) : $dummyImage;
         @endphp
         
-        <img src="{{ $heroImage }}" alt="Banners" class="rounded-[2rem] shadow-2xl relative z-10 w-full object-cover aspect-[4/5] object-center">
+        <div class="relative overflow-hidden aspect-[3/4]">
+    <img src="{{ ($closestEvent && $closestEvent->poster_path && \Storage::disk('public')->exists($closestEvent->poster_path)) ? asset('storage/' . $closestEvent->poster_path) : 'https://placehold.co/400x600?text=Hero+Poster' }}" 
+         alt="{{ $closestEvent->title ?? 'Poster Event' }}" 
+         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+</div>
 
         <div class="absolute -bottom-6 -left-6 glass p-6 rounded-2xl shadow-xl z-20 border border-white">
             <div class="flex items-center gap-4">

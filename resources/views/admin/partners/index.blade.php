@@ -136,7 +136,7 @@
         
         form.action = `/admin/partners/${id}`;
         inputName.value = name;
-        inputLogoUrl.value = logoUrl; // PERBAIKAN: Isi otomatis value input URL modal edit
+        inputLogoUrl.value = logoUrl; 
 
         modal.classList.remove('hidden');
         setTimeout(() => {

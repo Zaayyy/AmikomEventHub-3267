@@ -38,6 +38,22 @@
         </div>
     </nav>
 
+    @if(session('success'))
+        <div class="max-w-7xl mx-auto mt-6 px-6">
+            <div class="bg-green-100 text-green-700 p-4 rounded-xl font-bold text-sm border border-green-200">
+                {{ session('success') }}
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="max-w-7xl mx-auto mt-6 px-6">
+            <div class="bg-red-100 text-red-700 p-4 rounded-xl font-bold text-sm border border-red-200">
+                {{ session('error') }}
+            </div>
+        </div>
+    @endif
+
     @yield('content')
 
     <!-- Footer -->

@@ -4,14 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Transaction;
+use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class CheckoutController extends Controller
 {
+    public function __construct(private MidtransService $midtrans)
+    {
+    }
+
     public function create(Event $event)
     {
-        return view('checkout.create', compact('event'));
+        $categories = \App\Models\Category::all();
+
+        return view('checkout.create', compact('event', 'categories'));
     }
 
     public function store(Request $request, Event $event)
@@ -23,11 +30,13 @@ class CheckoutController extends Controller
         ]);
 
         if ($event->stock <= 0) {
-            return back()->with('error', 'Tiket sudah habis.');
+            return back()
+                ->withInput()
+                ->with('error', 'Mohon maaf, tiket untuk acara ini sudah habis.');
         }
 
         $orderId = 'TRX-' . time() . '-' . Str::random(5);
-        $totalPrice = $event->price + 5000; // Adding dummy service fee 5000
+        $totalPrice = $event->price + 5000;
 
         $transaction = Transaction::create([
             'event_id' => $event->id,
@@ -39,11 +48,7 @@ class CheckoutController extends Controller
             'status' => 'Pending',
         ]);
 
-        // Midtrans Config
-        \Midtrans\Config::$serverKey = config('midtrans.server_key');
-        \Midtrans\Config::$isProduction = config('midtrans.is_production');
-        \Midtrans\Config::$isSanitized = true;
-        \Midtrans\Config::$is3ds = true;
+        
 
         $params = [
             'transaction_details' => [
@@ -55,61 +60,75 @@ class CheckoutController extends Controller
                 'email' => $request->customer_email,
                 'phone' => $request->customer_phone,
             ],
+            'item_details' => [
+                [
+                    'id' => 'EVENT-' . $event->id,
+                    'price' => $event->price,
+                    'quantity' => 1,
+                    'name' => Str::limit($event->title, 45, ''),
+                ],
+                [
+                    'id' => 'SERVICE-FEE',
+                    'price' => 5000,
+                    'quantity' => 1,
+                    'name' => 'Biaya Layanan',
+                ],
+            ],
         ];
 
         try {
-            $snapToken = \Midtrans\Snap::getSnapToken($params);
-            $transaction->update(['snap_token' => $snapToken]);
+            $snapToken = $this->midtrans->createSnapToken($params);
+
+            $transaction->update([
+                'snap_token' => $snapToken,
+                'status' => 'pending',
+            ]);
+
             return redirect()->route('checkout.payment', $transaction->order_id);
         } catch (\Exception $e) {
-            return back()->with('error', 'Gagal memproses pembayaran: ' . $e->getMessage());
+            $transaction->update(['status' => 'failed']);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal memproses pembayaran jaringan: ' . $e->getMessage());
         }
     }
 
-    public function payment($order_id)
+    public function payment(string $order_id)
     {
-        $transaction = Transaction::with('event')->where('order_id', $order_id)->firstOrFail();
+        $transaction = Transaction::with('event')
+            ->where('order_id', $order_id)
+            ->firstOrFail();
+
+        if (! $transaction->snap_token) {
+            return redirect()
+                ->route('home')
+                ->with('error', 'Snap Token untuk transaksi ini belum tersedia.');
+        }
+
         return view('checkout.payment', compact('transaction'));
     }
 
-    public function success($order_id)
+    public function success(string $order_id)
     {
-        $transaction = Transaction::with('event')->where('order_id', $order_id)->firstOrFail();
-        
-        // Midtrans Config for fallback status check
-        \Midtrans\Config::$serverKey = config('midtrans.server_key');
-        \Midtrans\Config::$isProduction = config('midtrans.is_production');
-        \Midtrans\Config::$isSanitized = true;
-        \Midtrans\Config::$is3ds = true;
+        $transaction = Transaction::with('event')
+            ->where('order_id', $order_id)
+            ->firstOrFail();
 
         try {
-            // Check status directly to Midtrans API as a fallback when Webhook is unreachable (Local Dev)
-            $status = \Midtrans\Transaction::status($order_id);
-            
-            if ($status) {
-                // Determine transaction status natively regardless of object/array
-                $trx_status = is_array($status) ? ($status['transaction_status'] ?? '') : ($status->transaction_status ?? '');
-                
-                if (in_array($trx_status, ['settlement', 'capture'])) {
-                    if (strtolower($transaction->status) === 'pending') {
-                        $transaction->update(['status' => 'success']);
-                        
-                        if ($transaction->event->stock > 0) {
-                            $transaction->event->decrement('stock');
-                            
-                            try {
-                                \Illuminate\Support\Facades\Mail::to($transaction->customer_email)
-                                    ->send(new \App\Mail\EventTicketMail($transaction));
-                            } catch (\Exception $e) {
-                                \Log::error('Failed to send fallback email: ' . $e->getMessage());
-                            }
-                        }
-                    }
-                }
+            $transactionStatus = $this->midtrans->getTransactionStatus($order_id);
+
+            if (in_array($transactionStatus, ['capture', 'settlement'], true)) {
+                $transaction->update(['status' => 'success']);
+            } elseif ($transactionStatus === 'pending') {
+                $transaction->update(['status' => 'pending']);
+            } elseif (in_array($transactionStatus, ['cancel', 'deny', 'expire', 'failure'], true)) {
+                $transaction->update(['status' => 'failed']);
             }
         } catch (\Exception $e) {
-            // Ignore if status check fails (e.g., config error)
-            \Log::error('Status check fallback failed: ' . $e->getMessage());
+            return redirect()
+                ->route('home')
+                ->with('error', 'Transaksi tidak ditemukan atau gagal diproses oleh sistem pembayaran.');
         }
 
         return view('checkout.success', compact('transaction'));

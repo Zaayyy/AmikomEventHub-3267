@@ -10,10 +10,10 @@
         @method('PUT')
         
         <div>
-            <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Judul Event</label>
-            <input type="text" name="title" value="{{ old('title', $event->title) }}" class="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none transition font-medium" required>
-            @error('title') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
-        </div>
+    <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Judul Event</label>
+    <input type="text" name="title" value="{{ old('title', $event->title) }}" class="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none transition font-medium" required>
+    @error('title') <span class="text-red-500 text-sm mt-1">{{ $message }}</span> @enderror
+</div>
 
         <div>
             <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Kategori</label>
