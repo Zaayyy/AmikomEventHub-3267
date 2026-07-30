@@ -1,9 +1,41 @@
 <?php
 
+// Show all errors for debugging (remove after fixing)
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', '1');
+error_reporting(E_ALL);
+
 define('LARAVEL_START', microtime(true));
 
 // Base path of the Laravel application
 $basePath = dirname(__DIR__);
+
+// Debug: Check if critical files exist
+$criticalFiles = [
+    'vendor/autoload.php',
+    'bootstrap/app.php',
+    'config/app.php',
+    '.env',
+];
+
+$missing = [];
+foreach ($criticalFiles as $file) {
+    if (!file_exists($basePath . '/' . $file)) {
+        $missing[] = $file;
+    }
+}
+
+if (!empty($missing)) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode([
+        'error' => 'Missing critical files',
+        'basePath' => $basePath,
+        'missing' => $missing,
+        'dir_contents' => scandir($basePath),
+    ]);
+    exit(1);
+}
 
 // Determine if the application is in maintenance mode...
 if (file_exists($maintenance = $basePath . '/storage/framework/maintenance.php')) {
