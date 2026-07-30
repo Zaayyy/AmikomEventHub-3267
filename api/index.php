@@ -18,6 +18,10 @@ foreach ([
     }
 }
 
+putenv("APP_STORAGE_PATH={$storagePath}");
+$_ENV['APP_STORAGE_PATH'] = $storagePath;
+$_SERVER['APP_STORAGE_PATH'] = $storagePath;
+
 // Setup SQLite in /tmp by copying pre-seeded database if present
 $dbFile = '/tmp/database.sqlite';
 if (!file_exists($dbFile)) {
@@ -38,13 +42,11 @@ require_once $basePath . '/vendor/autoload.php';
 /** @var \Illuminate\Foundation\Application $app */
 $app = require_once $basePath . '/bootstrap/app.php';
 
-// Override storage path to /tmp/storage
-$app->useStoragePath($storagePath);
-
 // Handle Request
 $request = Illuminate\Http\Request::capture();
 $response = $app->handleRequest($request);
 $response->send();
+
 
 
 
