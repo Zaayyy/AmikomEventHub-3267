@@ -25,7 +25,8 @@ foreach ([
 
 // Setup SQLite in /tmp if using sqlite
 $dbFile = '/tmp/database.sqlite';
-if (!file_exists($dbFile)) {
+$isNewDb = !file_exists($dbFile);
+if ($isNewDb) {
     @touch($dbFile);
 }
 putenv("DB_DATABASE={$dbFile}");
@@ -43,6 +44,21 @@ try {
     // Override storage path to /tmp/storage
     $app->useStoragePath($storagePath);
 
+    // Register essential providers
+    $app->register(\Illuminate\View\ViewServiceProvider::class);
+
+    // If new SQLite DB, auto-run migrations and seeders
+    if ($isNewDb) {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('migrate:fresh', [
+                '--force' => true,
+                '--seed' => true,
+            ]);
+        } catch (\Throwable $migrationError) {
+            // Ignore migration error if already ran or continue
+        }
+    }
+
     // Handle Request
     $request = Illuminate\Http\Request::capture();
     $response = $app->handleRequest($request);
@@ -56,4 +72,6 @@ try {
     echo "Trace:\n" . $e->getTraceAsString();
     exit(1);
 }
+
+
 
