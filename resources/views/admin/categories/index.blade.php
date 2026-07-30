@@ -1,12 +1,10 @@
 @extends('layouts.admin')
 
+@section('page_title', 'Kelola Kategori Event')
+@section('page_subtitle', 'Sisi panel admin untuk manajemen data kategori AmikomEventHub.')
+
 @section('content')
 <div class="max-w-7xl mx-auto px-6 py-10">
-    <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Kelola Kategori Event</h1>
-        <p class="text-slate-500 text-sm mt-1">Sisi panel admin untuk manajemen data kategori AmikomEventHub.</p>
-    </div>
-
     @if(session('success'))
         <div class="mb-6 p-4 bg-green-50 text-green-700 rounded-xl font-semibold text-sm border border-green-100">
             {{ session('success') }}

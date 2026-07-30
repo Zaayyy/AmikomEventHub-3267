@@ -22,7 +22,7 @@ class AuthController extends Controller
         ]);
 
         if (Auth::attempt($credentials)) {
-            if (Auth::user()->role === 'admin') {
+            if (in_array(Auth::user()->role, ['admin', 'superadmin'], true)) {
                 $request->session()->regenerate();
                 return redirect()->route('admin.dashboard');
             } else {
@@ -39,6 +39,6 @@ class AuthController extends Controller
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
-        return redirect()->route('login');
+        return redirect()->route('admin.login');
     }
 }

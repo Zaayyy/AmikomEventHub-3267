@@ -8,7 +8,13 @@ class EventController extends Controller
 {
     public function show(Event $event)
     {
-        $event->load('category');
+        $event->load([
+            'category',
+            'partner',
+            'reviews.user',
+        ]);
+
+        $event->loadAvg('reviews', 'rating');
 
         return view('events.event-detail', compact('event'));
     }

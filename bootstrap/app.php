@@ -10,12 +10,23 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        // Daftarkan alias middleware admin di sini
+
+    ->withMiddleware(function (Middleware $middleware) {
+
+        // Alias Middleware
         $middleware->alias([
-            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'admin'   => \App\Http\Middleware\AdminMiddleware::class,
+            'partner' => \App\Http\Middleware\PartnerMiddleware::class,
         ]);
+
+        // CSRF Exception
+        $middleware->validateCsrfTokens(except: [
+            '/midtrans/callback',
+        ]);
+
     })
+
     ->withExceptions(function (Exceptions $exceptions): void {
         //
-    })->create();
+    })
+    ->create();

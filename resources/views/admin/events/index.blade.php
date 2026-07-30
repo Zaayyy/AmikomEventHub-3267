@@ -35,7 +35,8 @@
                     
                     <td class="px-8 py-6">
                         <p class="font-black text-slate-800">{{ $event->title }}</p>
-                        <p class="text-xs text-slate-400">{{ $event->category->name ?? '-' }} • {{ $event->date->format('d M Y') }}</p>
+                        <p class="text-xs text-slate-400">{{ $event->category->name ?? '-' }} &bull; {{ $event->partner->name ?? 'Tanpa Penyelenggara' }}</p>
+                        <p class="text-xs text-slate-400">{{ $event->date->format('d M Y') }}</p>
                     </td>
                     
                     <td class="px-8 py-6">

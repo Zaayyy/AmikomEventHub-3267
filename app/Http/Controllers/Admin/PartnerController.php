@@ -4,62 +4,107 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Partner;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class PartnerController extends Controller
 {
-    // READ: Menampilkan halaman utama & pencarian partner
     public function index(Request $request)
     {
-        $search = $request->input('search');
-
-        if ($search) {
-            $partners = Partner::where('name', 'LIKE', '%' . $search . '%')
-                ->latest()
-                ->get();
-        } else {
-            $partners = Partner::latest()->get();
-        }
+        $partners = Partner::with(['events', 'user'])
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'like', '%' . $request->search . '%');
+            })
+            ->latest()
+            ->get();
 
         return view('admin.partners.index', compact('partners'));
     }
 
-    // CREATE: Menyimpan nama dan URL logo partner langsung ke database
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'logo_url' => 'required|url|max:255' // PERBAIKAN: Validasi tipe URL string
+            'name' => 'required|max:255',
+            'logo_url' => 'required',
+            'description' => 'nullable',
+
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:8',
         ]);
 
-        Partner::create([
+        $partner = Partner::create([
             'name' => $request->name,
-            'logo_url' => $request->logo_url
+            'logo_url' => $request->logo_url,
+            'description' => $request->description,
         ]);
 
-        return redirect()->route('admin.partners.index')->with('success', 'Partner baru berhasil ditambahkan!');
-    }
+        User::create([
+            'name' => $partner->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
 
-    // UPDATE: Memperbarui nama atau URL logo partner
-    public function update(Request $request, Partner $partner)
+            'role' => 'partner',
+
+            'partner_id' => $partner->id,
+        ]);
+        
+
+        return back()->with('success', 'Partner berhasil ditambahkan.');
+    }
+        public function update(Request $request, Partner $partner)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'logo_url' => 'required|url|max:255' // PERBAIKAN: Validasi tipe URL string
+            'name' => 'required|max:255',
+            'logo_url' => 'required',
+            'description' => 'nullable',
+
+            'email' => 'required|email|unique:users,email,' . optional($partner->user)->id,
+            'password' => 'nullable|min:8',
         ]);
 
         $partner->update([
             'name' => $request->name,
-            'logo_url' => $request->logo_url
+            'logo_url' => $request->logo_url,
+            'description' => $request->description,
         ]);
 
-        return redirect()->route('admin.partners.index')->with('success', 'Data partner berhasil diperbarui!');
+        if ($partner->user) {
+
+            $partner->user->name = $partner->name;
+            $partner->user->email = $request->email;
+
+            if ($request->filled('password')) {
+                $partner->user->password = Hash::make($request->password);
+            }
+
+            $partner->user->save();
+
+        } else {
+
+            User::create([
+                'name' => $partner->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password ?? 'password123'),
+
+                'role' => 'partner',
+
+                'partner_id' => $partner->id,
+            ]);
+
+        }
+
+        return back()->with('success', 'Partner berhasil diperbarui.');
     }
 
-    // DELETE: Langsung hapus dari database tanpa perlu unlink file storage
     public function destroy(Partner $partner)
     {
+        if ($partner->user) {
+            $partner->user->delete();
+        }
+
         $partner->delete();
-        return redirect()->route('admin.partners.index')->with('success', 'Partner berhasil dihapus!');
+
+        return back()->with('success', 'Partner berhasil dihapus.');
     }
 }

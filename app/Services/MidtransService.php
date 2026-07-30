@@ -27,10 +27,11 @@ class MidtransService
     }
 
     private function configure(): void
-    {
-        Config::$serverKey = config('midtrans.server_key');
-        Config::$isProduction = (bool) config('midtrans.is_production');
-        Config::$isSanitized = true;
-        Config::$is3ds = true;
-    }
+{
+
+    Config::$serverKey = config('midtrans.server_key');
+    Config::$isProduction = (bool) config('midtrans.is_production');
+    Config::$isSanitized = true;
+    Config::$is3ds = true;
+}
 }

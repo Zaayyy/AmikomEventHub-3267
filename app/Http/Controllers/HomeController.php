@@ -22,6 +22,7 @@ class HomeController extends Controller
             ->latest()
             ->get();
 
+            
         $categories = Category::all();
 
         // 2. TAMBAHKAN INI: Ambil semua data partner dari database

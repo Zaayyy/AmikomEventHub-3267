@@ -21,17 +21,18 @@ class MidtransWebhookController extends Controller
             return response()->json(['message' => 'Invalid payload'], 400);
         }
 
+        // Mencari ID transaksi tersebut di database lokal kita
         $transaction = Transaction::with('event')->where('order_id', $orderId)->first();
-
         if (!$transaction) {
             return response()->json(['message' => 'Transaction not found'], 404);
         }
 
-        // Only process if status is not already settlement/success
+        // Cegah proses berulang jika status sudah lunas/sukses
         if ($transaction->status === 'settlement' || $transaction->status === 'success') {
             return response()->json(['message' => 'Already processed']);
         }
 
+        // Logika Penerjemahan Status Midtrans API
         if ($transactionStatus == 'capture') {
             if ($fraudStatus == 'challenge') {
                 $transaction->status = 'challenge';
@@ -42,35 +43,33 @@ class MidtransWebhookController extends Controller
         } else if ($transactionStatus == 'settlement') {
             $transaction->status = 'settlement';
             $this->processSuccess($transaction);
-        } else if ($transactionStatus == 'cancel' ||
-          $transactionStatus == 'deny' ||
-          $transactionStatus == 'expire') {
+        } else if (in_array($transactionStatus, ['cancel', 'deny', 'expire'])) {
             $transaction->status = 'failed';
-        } else if ($transactionStatus == 'pending') {
+            } else if ($transactionStatus == 'pending') {
             $transaction->status = 'pending';
         }
 
         $transaction->save();
         return response()->json(['message' => 'OK']);
     }
-
-    private function processSuccess(Transaction $transaction)
+private function processSuccess(Transaction $transaction)
     {
         $event = $transaction->event;
         
-        // Final sanity check before reducing stock
-        if ($event->stock > 0) {
-            $event->decrement('stock');
-            // Send E-Ticket via Email
+        // Jika tiket masih ada dan terhubung dengan data event, kurangi jumlahnya sebanyak 1
+        if ($event && $event->stock > 0) {
+            $event->stock = $event->stock - 1;
+            $event->save();
+            
+            // Mengirimkan email E-Ticket ke pelanggan
             try {
-                Mail::to($transaction->customer_email)->send(new EventTicketMail($transaction));
+                \Illuminate\Support\Facades\Mail::to($transaction->customer_email)->send(new \App\Mail\EventTicketMail($transaction));
             } catch (\Exception $e) {
-                // Log the error but don't fail the webhook
-                \Log::error('Failed to send email to ' . $transaction->customer_email . ': ' . $e->getMessage());
+                \Log::error('Gagal mengirim email E-Ticket: ' . $e->getMessage());
             }
         } else {
-            \Log::warning('Stock empty for event ' . $event->id . ' upon payment settlement for order ' . $transaction->order_id);
-            // In a real app, handle refund logic here
+            \Log::warning('Stock habis setelah pembayaran berhasil (Perlu proses refund opsional). Order: ' . $transaction->order_id);
         }
     }
 }
+

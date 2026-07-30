@@ -4,64 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>E-Ticket - AmikomEventHub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #4f46e5; margin: 0; padding: 40px 20px; color: #ffffff; }
+        .container { max-width: 450px; margin: 0 auto; width: 100%; }
+        .header-text { text-align: center; margin-bottom: 30px; }
+        .header-text h1 { font-size: 28px; font-weight: 900; margin: 0 0 10px 0; }
+        .header-text p { color: #e0e7ff; margin: 0; }
+        .ticket-card { background-color: #ffffff; color: #0f172a; border-radius: 30px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .ticket-top { background-color: #eef2ff; padding: 30px; text-align: center; border-bottom: 2px dashed #c7d2fe; }
+        .ticket-top p { color: #4f46e5; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 10px 0; }
+        .ticket-top h2 { font-size: 24px; font-weight: 900; margin: 0; }
+        .ticket-body { padding: 30px; }
+        .grid { display: block; width: 100%; margin-bottom: 20px; }
+        .grid-item { display: inline-block; width: 45%; vertical-align: top; margin-bottom: 20px; }
+        .label { color: #94a3b8; font-size: 11px; font-weight: bold; text-transform: uppercase; margin: 0 0 5px 0; }
+        .value { font-weight: bold; font-size: 16px; margin: 0; }
+        .qr-section { background-color: #f8fafc; padding: 25px; border-radius: 20px; text-align: center; margin-top: 10px; }
+        .qr-container { background-color: white; padding: 15px; border-radius: 12px; display: inline-block; margin-bottom: 15px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        .footer { text-align: center; padding: 0 30px 30px 30px; color: #94a3b8; font-size: 12px; }
     </style>
 </head>
-<body class="bg-indigo-600 text-white min-h-screen flex items-center justify-center p-6">
-
-    <div class="max-w-md w-full mx-auto" style="max-width: 500px;">
+<body>
+    <div class="container">
         <!-- Success Banner -->
-        <div class="text-center mb-8" style="text-align: center; margin-bottom: 2rem;">
-            <h1 class="text-3xl font-black" style="font-size: 1.8rem; font-weight: 900; margin-bottom: 0.5rem;">Pembayaran Berhasil!</h1>
-            <p class="text-indigo-100 mt-2" style="color: #e0e7ff;">Tiket Anda telah terbit dan siap digunakan.</p>
+        <div class="header-text">
+            <h1>Pembayaran Berhasil!</h1>
+            <p>Tiket Anda telah terbit dan siap digunakan.</p>
         </div>
 
         <!-- Ticket Card -->
-        <div class="bg-white text-slate-900 rounded-[2.5rem] overflow-hidden shadow-2xl relative" style="background: white; border-radius: 2.5rem; color: #0f172a;">
+        <div class="ticket-card">
             <!-- Ticket Header -->
-            <div class="p-8 bg-indigo-50 border-b-4 border-dashed border-indigo-100 text-center relative" style="padding: 2rem; background: #eef2ff; border-bottom: 4px dashed #c7d2fe; text-align: center;">
-                <p class="text-indigo-600 font-bold uppercase tracking-widest text-xs mb-2" style="color: #4f46e5; font-weight: bold; letter-spacing: 0.1em; font-size: 0.75rem;">E-Ticket Resmi</p>
-                <h2 class="text-2xl font-black leading-tight" style="font-size: 1.5rem; font-weight: 900;">{{ $transaction->event->title }}</h2>
+            <div class="ticket-top">
+                <p>E-Ticket Resmi</p>
+                <h2>{{ $transaction->event->title }}</h2>
             </div>
 
             <!-- Ticket Body -->
-            <div class="p-8 space-y-8" style="padding: 2rem;">
-                <div class="grid grid-cols-2 gap-6" style="display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 2rem;">
-                    <div style="width: 45%; margin-bottom: 1rem;">
-                        <p class="text-slate-400 text-xs font-bold uppercase mb-1" style="color: #94a3b8; font-size: 0.75rem; font-weight: bold;">Nama Pembeli</p>
-                        <p class="font-bold text-lg" style="font-weight: bold; font-size: 1.125rem;">{{ $transaction->customer_name }}</p>
+            <div class="ticket-body">
+                <div class="grid">
+                    <div class="grid-item">
+                        <p class="label">Nama Pembeli</p>
+                        <p class="value">{{ $transaction->customer_name }}</p>
                     </div>
-                    <div style="width: 45%; margin-bottom: 1rem;">
-                        <p class="text-slate-400 text-xs font-bold uppercase mb-1" style="color: #94a3b8; font-size: 0.75rem; font-weight: bold;">Tanggal & Waktu</p>
-                        <p class="font-bold text-lg" style="font-weight: bold; font-size: 1.125rem;">{{ $transaction->event->date->format('d M y, H:i') }}</p>
+                    <div class="grid-item">
+                        <p class="label">Tanggal & Waktu</p>
+                        <p class="value">{{ \Carbon\Carbon::parse($transaction->event->date)->format('d M, H:i') }}</p>
                     </div>
-                    <div style="width: 45%; margin-bottom: 1rem;">
-                        <p class="text-slate-400 text-xs font-bold uppercase mb-1" style="color: #94a3b8; font-size: 0.75rem; font-weight: bold;">Order ID</p>
-                        <p class="font-bold" style="font-weight: bold;">{{ $transaction->order_id }}</p>
+                    <div class="grid-item">
+                        <p class="label">Order ID</p>
+                        <p class="value">{{ $transaction->order_id }}</p>
                     </div>
-                    <div style="width: 45%; margin-bottom: 1rem;">
-                        <p class="text-slate-400 text-xs font-bold uppercase mb-1" style="color: #94a3b8; font-size: 0.75rem; font-weight: bold;">Lokasi</p>
-                        <p class="font-bold" style="font-weight: bold;">{{ $transaction->event->location }}</p>
+                    <div class="grid-item">
+                        <p class="label">Lokasi</p>
+                        <p class="value">{{ $transaction->event->location }}</p>
                     </div>
                 </div>
 
-                <div class="bg-slate-100 p-6 rounded-3xl flex flex-col items-center" style="background: #f1f5f9; padding: 1.5rem; border-radius: 1.5rem; text-align: center;">
-                    <p class="text-slate-400 text-xs font-bold uppercase mb-4" style="color: #94a3b8; font-size: 0.75rem; font-weight: bold;">Simpan QR/KODE ini</p>
-                    <div class="w-48 h-48 bg-white p-4 rounded-xl shadow-inner flex items-center justify-center cursor-pointer" style="background: white; padding: 1rem; border-radius: 0.75rem; width: 200px; margin: 0 auto; min-height: 200px;">
-                        <!-- QR Code PlaceHolder -->
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ $transaction->order_id }}" alt="QR Code" style="width: 100%; height: auto;">
+                <div class="qr-section">
+                    <p class="label" style="margin-bottom: 15px;">Scan QR untuk Check-in</p>
+                    <div class="qr-container">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode($transaction->order_id) }}" alt="QR Code" width="150" height="150" style="display: block;">
                     </div>
+                    <p style="margin: 0; font-family: monospace; font-weight: bold; color: #1e293b;">{{ $transaction->order_id }}</p>
                 </div>
             </div>
 
-            <div class="px-8 pb-8" style="padding: 0 2rem 2rem 2rem;">
-                <p class="text-center mt-4 text-slate-500 font-bold" style="text-align: center; color: #64748b; font-weight: bold;">Silakan tunjukkan tiket ini pada saat memasuki area event.</p>
+            <div class="footer">
+                <p>Mohon tunjukkan E-Ticket ini saat memasuki area acara.</p>
+                <p style="margin-top: 10px;">&copy; {{ date('Y') }} AmikomEventHub.</p>
             </div>
         </div>
     </div>
-
 </body>
 </html>

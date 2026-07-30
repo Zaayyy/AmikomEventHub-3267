@@ -15,7 +15,10 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (\Illuminate\Support\Facades\Auth::check() && \Illuminate\Support\Facades\Auth::user()->role === 'admin') {
+        if (
+            \Illuminate\Support\Facades\Auth::check()
+            && in_array(\Illuminate\Support\Facades\Auth::user()->role, ['admin', 'superadmin'], true)
+        ) {
             return $next($request);
         }
 

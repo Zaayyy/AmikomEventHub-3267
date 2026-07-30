@@ -23,7 +23,7 @@ class EventTicketMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'E-Ticket: ' . $this->transaction->event->title,
+            subject: 'E-Ticket Resmi Anda: ' . $this->transaction->event->title,
         );
     }
 

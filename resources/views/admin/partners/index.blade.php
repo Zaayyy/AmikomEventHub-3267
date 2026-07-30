@@ -1,157 +1,537 @@
 @extends('layouts.admin')
 
+@section('page_title', 'Kelola Partner & Sponsor')
+@section('page_subtitle', 'Sisi panel admin untuk manajemen data partner kerja sama AmikomEventHub.')
+
 @section('content')
+
 <div class="max-w-7xl mx-auto px-6 py-10">
-    <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Kelola Partner & Sponsor</h1>
-        <p class="text-slate-500 text-sm mt-1">Sisi panel admin untuk manajemen data partner kerja sama AmikomEventHub.</p>
-    </div>
 
     @if(session('success'))
-        <div class="mb-6 p-4 bg-green-50 text-green-700 rounded-xl font-semibold text-sm border border-green-100">
+        <div class="mb-6 p-4 bg-green-50 text-green-700 rounded-xl border border-green-100 font-semibold">
             {{ session('success') }}
         </div>
     @endif
 
+    {{-- Ringkasan error, muncul kalau ada validasi yang gagal di form manapun di halaman ini --}}
+    @if($errors->any())
+        <div class="mb-6 p-4 bg-red-50 text-red-700 rounded-xl border border-red-100 font-semibold">
+            <p class="mb-2">Data gagal disimpan, mohon periksa kembali isian berikut:</p>
+            <ul class="list-disc list-inside text-sm font-normal space-y-1">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-            <h2 class="text-lg font-bold text-slate-800 mb-4">Tambah Partner</h2>
-            <form action="{{ route('admin.partners.store') }}" method="POST" class="space-y-4">
+
+        {{-- ================= FORM TAMBAH PARTNER ================= --}}
+        <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+
+            <h2 class="text-lg font-bold text-slate-800 mb-6">
+                Tambah Partner
+            </h2>
+
+            <form action="{{ route('admin.partners.store') }}" method="POST" class="space-y-5">
+
                 @csrf
+
                 <div>
-                    <label class="block text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Nama Perusahaan/Brand</label>
-                    <input type="text" name="name" required placeholder="Misal: PT. Tech Indo"
-                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 text-sm transition">
+                    <label class="block text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">
+                        Nama Perusahaan / Organisasi
+                    </label>
+
+                    <input
+                        type="text"
+                        name="name"
+                        required
+                        value="{{ old('name') }}"
+                        placeholder="Contoh : HIMA SI AMIKOM"
+                        class="w-full px-4 py-3 rounded-xl border @error('name') border-red-400 @else border-slate-200 @enderror focus:border-indigo-600 focus:outline-none">
+
+                    @error('name')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
+
                 <div>
-                    <label class="block text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">URL Logo Gambar</label>
-                    <input type="url" name="logo_url" required placeholder="https://example.com/logo.png"
-                           class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 text-sm transition">
+                    <label class="block text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">
+                        Logo URL
+                    </label>
+
+                    <input
+                        type="url"
+                        name="logo_url"
+                        required
+                        value="{{ old('logo_url') }}"
+                        placeholder="https://..."
+                        class="w-full px-4 py-3 rounded-xl border @error('logo_url') border-red-400 @else border-slate-200 @enderror focus:border-indigo-600 focus:outline-none">
+
+                    @error('logo_url')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
-                <button type="submit" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition shadow-lg shadow-indigo-100">
+
+                <div>
+                    <label class="block text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">
+                        Deskripsi
+                    </label>
+
+                    <textarea
+                        name="description"
+                        rows="3"
+                        placeholder="Deskripsi partner..."
+                        class="w-full px-4 py-3 rounded-xl border @error('description') border-red-400 @else border-slate-200 @enderror focus:border-indigo-600 focus:outline-none">{{ old('description') }}</textarea>
+
+                    @error('description')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <hr>
+
+                <div class="bg-indigo-50 rounded-xl p-4">
+
+                    <h4 class="font-bold text-indigo-700 mb-4">
+                        Akun Login Partner
+                    </h4>
+
+                    <div class="space-y-4">
+
+                        <div>
+
+                            <label class="block text-xs uppercase font-bold tracking-wider text-slate-500 mb-2">
+                                Email Login
+                            </label>
+
+                            <input
+                                type="email"
+                                name="email"
+                                required
+                                value="{{ old('email') }}"
+                                placeholder="partner@email.com"
+                                class="w-full px-4 py-3 rounded-xl border @error('email') border-red-400 @else border-slate-200 @enderror focus:border-indigo-600 focus:outline-none">
+
+                            @error('email')
+                                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @enderror
+
+                        </div>
+
+                        <div>
+
+                            <label class="block text-xs uppercase font-bold tracking-wider text-slate-500 mb-2">
+                                Password Awal
+                            </label>
+
+                            <input
+                                type="password"
+                                name="password"
+                                required
+                                placeholder="Minimal 8 karakter"
+                                class="w-full px-4 py-3 rounded-xl border @error('password') border-red-400 @else border-slate-200 @enderror focus:border-indigo-600 focus:outline-none">
+
+                            @error('password')
+                                <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                            @else
+                                <p class="text-xs text-slate-400 mt-2">
+                                    Password ini akan digunakan partner saat login dashboard.
+                                </p>
+                            @enderror
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold transition">
+
                     Simpan Partner
+
                 </button>
+
             </form>
+
         </div>
 
+        {{-- =================== TABEL =================== --}}
+
         <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-            <div class="p-6 border-b border-slate-50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <h3 class="font-bold text-slate-800">Daftar Partner</h3>
-                <form action="{{ route('admin.partners.index') }}" method="GET" class="flex items-center gap-2 w-full md:w-72">
-                    <div class="relative w-full">
-                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari partner..." 
-                               class="w-full pl-4 pr-10 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-indigo-600 transition">
-                        @if(request('search'))
-                            <a href="{{ route('admin.partners.index') }}" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 text-xs font-bold">Clear</a>
-                        @endif
-                    </div>
-                    <button type="submit" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition">
-                        Cari
-                    </button>
+
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+
+                <div>
+
+                    <h3 class="font-bold text-slate-800">
+                        Daftar Partner
+                    </h3>
+
+                    <p class="text-xs text-slate-400 mt-1">
+                        Partner yang telah terdaftar pada sistem.
+                    </p>
+
+                </div>
+
+                <form action="{{ route('admin.partners.index') }}" method="GET">
+
+                    <input
+                        type="text"
+                        name="search"
+                        value="{{ request('search') }}"
+                        placeholder="Cari partner..."
+                        class="px-4 py-2 rounded-xl border border-slate-200 focus:border-indigo-600 focus:outline-none">
+
                 </form>
+
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 border-b border-slate-100 text-xs font-bold uppercase text-slate-400 tracking-wider">
-                            <th class="px-6 py-4">Logo</th>
-                            <th class="px-6 py-4">Nama Perusahaan</th>
-                            <th class="px-6 py-4">Terdaftar Pada</th>
-                            <th class="px-6 py-4 text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-50 text-sm text-slate-600">
-                        @forelse($partners as $partner)
-                            <tr class="hover:bg-slate-50/50 transition">
-                                <td class="px-6 py-4">
-                                    <div class="w-16 h-10 bg-slate-50 rounded-lg p-1 flex items-center justify-center border border-slate-100">
-                                        <img src="{{ $partner->logo_url }}" alt="Logo" class="max-w-full max-h-full object-contain">
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 font-bold text-slate-800">{{ $partner->name }}</td>
-                                <td class="px-6 py-4 text-xs text-slate-400">{{ $partner->created_at->format('d M Y') }}</td>
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center justify-center gap-3">
-                                        <button onclick="openEditModal({{ $partner->id }}, '{{ $partner->name }}', '{{ $partner->logo_url }}')" 
-                                                class="px-3 py-1.5 bg-amber-50 text-amber-600 font-bold text-xs rounded-lg hover:bg-amber-600 hover:text-white transition">
-                                            Edit
-                                        </button>
-                                        <form action="{{ route('admin.partners.destroy', $partner->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus partner ini?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="px-3 py-1.5 bg-red-50 text-red-600 font-bold text-xs rounded-lg hover:bg-red-600 hover:text-white transition">
-                                                Hapus
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="px-6 py-12 text-center text-slate-400 font-medium">Belum ada mitra/partner kerja sama terdaftar.</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+                <table class="w-full">
+
+    <thead class="bg-slate-50 border-b border-slate-100">
+
+        <tr class="text-xs uppercase tracking-wider text-slate-400">
+
+            <th class="px-6 py-4 text-left">
+                Logo
+            </th>
+
+            <th class="px-6 py-4 text-left">
+                Partner
+            </th>
+
+            <th class="px-6 py-4 text-left">
+                Akun Login
+            </th>
+
+            <th class="px-6 py-4 text-left">
+                Event
+            </th>
+
+            <th class="px-6 py-4 text-center">
+                Aksi
+            </th>
+
+        </tr>
+
+    </thead>
+
+    <tbody class="divide-y divide-slate-100">
+
+        @forelse($partners as $partner)
+
+        <tr class="hover:bg-slate-50 transition">
+
+            {{-- Logo --}}
+            <td class="px-6 py-5">
+
+                <img
+                    src="{{ $partner->logo_url }}"
+                    class="w-16 h-16 rounded-xl object-cover border">
+
+            </td>
+
+            {{-- Nama --}}
+            <td class="px-6 py-5">
+
+                <div class="font-bold text-slate-800">
+
+                    {{ $partner->name }}
+
+                </div>
+
+                <div class="text-sm text-slate-500 mt-1">
+
+                    {{ $partner->description ?: '-' }}
+
+                </div>
+
+            </td>
+
+            {{-- Akun Login --}}
+            <td class="px-6 py-5">
+
+                @if($partner->user)
+
+                    <div class="space-y-1">
+
+                        <div class="font-semibold text-slate-700">
+
+                            {{ $partner->user->email }}
+
+                        </div>
+
+                        <span class="inline-flex items-center px-2 py-1 rounded-lg bg-green-100 text-green-700 text-xs font-bold">
+
+                            Aktif
+
+                        </span>
+
+                    </div>
+
+                @else
+
+                    <span class="inline-flex items-center px-2 py-1 rounded-lg bg-red-100 text-red-600 text-xs font-bold">
+
+                        Belum Ada Akun
+
+                    </span>
+
+                @endif
+
+            </td>
+
+            {{-- Jumlah Event --}}
+            <td class="px-6 py-5">
+
+                <span class="font-bold text-indigo-600">
+
+                    {{ $partner->events->count() }}
+
+                </span>
+
+                Event
+
+            </td>
+
+            {{-- Tombol --}}
+            <td class="px-6 py-5">
+
+                <div class="flex justify-center gap-2">
+
+                    <button
+                        onclick="openEditModal(
+                            {{ $partner->id }},
+                            @js($partner->name),
+                            @js($partner->logo_url),
+                            @js($partner->description),
+                            @js(optional($partner->user)->email)
+                        )"
+                        class="px-4 py-2 rounded-lg bg-amber-500 text-white hover:bg-amber-600 font-bold">
+
+                        Edit
+
+                    </button>
+
+                    <form
+                        action="{{ route('admin.partners.destroy',$partner) }}"
+                        method="POST"
+                        onsubmit="return confirm('Yakin hapus partner ini?')">
+
+                        @csrf
+                        @method('DELETE')
+
+                        <button
+                            class="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-bold">
+
+                            Hapus
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+        @empty
+
+        <tr>
+
+            <td colspan="5" class="text-center py-12 text-slate-400">
+
+                Belum ada partner.
+
+            </td>
+
+        </tr>
+
+        @endforelse
+
+    </tbody>
+
+</table>
+
 </div>
 
-<div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-300">
-    <div class="bg-white rounded-2xl p-6 w-full max-w-md m-4 transform scale-95 transition-transform duration-300">
-        <h3 class="text-lg font-bold text-slate-800 mb-4">Edit Data Partner</h3>
-        <form id="editForm" method="POST" class="space-y-4">
+</div>
+
+</div>
+{{-- ================= MODAL EDIT ================= --}}
+
+<div id="editModal"
+     class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden items-center justify-center z-50">
+
+    <div class="bg-white rounded-3xl w-full max-w-lg p-8 shadow-2xl">
+
+        <div class="flex justify-between items-center mb-6">
+
+            <h2 class="text-2xl font-black text-slate-800">
+                Edit Partner
+            </h2>
+
+            <button
+                onclick="closeEditModal()"
+                class="text-slate-500 hover:text-red-500 text-2xl">
+
+                &times;
+
+            </button>
+
+        </div>
+
+        <form
+            id="editForm"
+            method="POST">
+
             @csrf
             @method('PUT')
-            <div>
-                <label class="block text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">Nama Partner Baru</label>
-                <input type="text" id="edit_name" name="name" required
-                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 text-sm transition">
+
+            <div class="space-y-5">
+
+                <div>
+
+                    <label class="block font-semibold mb-2">
+                        Nama Partner
+                    </label>
+
+                    <input
+                        id="edit_name"
+                        name="name"
+                        type="text"
+                        required
+                        class="w-full rounded-xl border px-4 py-3">
+
+                </div>
+
+                <div>
+
+                    <label class="block font-semibold mb-2">
+                        Logo URL
+                    </label>
+
+                    <input
+                        id="edit_logo_url"
+                        name="logo_url"
+                        type="text"
+                        required
+                        class="w-full rounded-xl border px-4 py-3">
+
+                </div>
+
+                <div>
+
+                    <label class="block font-semibold mb-2">
+                        Deskripsi
+                    </label>
+
+                    <textarea
+                        id="edit_description"
+                        name="description"
+                        rows="3"
+                        class="w-full rounded-xl border px-4 py-3"></textarea>
+
+                </div>
+
+                <hr>
+
+                <h4 class="font-bold text-indigo-600">
+                    Akun Login Partner
+                </h4>
+
+                <div>
+
+                    <label class="block font-semibold mb-2">
+                        Email
+                    </label>
+
+                    <input
+                        id="edit_email"
+                        name="email"
+                        type="email"
+                        class="w-full rounded-xl border px-4 py-3">
+
+                </div>
+
+                <div>
+
+                    <label class="block font-semibold mb-2">
+                        Password Baru
+                    </label>
+
+                    <input
+                        name="password"
+                        type="password"
+                        placeholder="Kosongkan jika tidak ingin mengganti password"
+                        class="w-full rounded-xl border px-4 py-3">
+
+                </div>
+
             </div>
-            <div>
-                <label class="block text-xs font-bold uppercase text-slate-400 tracking-wider mb-2">URL Logo Baru</label>
-                <input type="url" id="edit_logo_url" name="logo_url" required
-                       class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:border-indigo-600 text-sm transition">
-            </div>
-            <div class="flex justify-end gap-3 pt-2">
-                <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs hover:bg-slate-200 transition">
+
+            <div class="flex justify-end gap-3 mt-8">
+
+                <button
+                    type="button"
+                    onclick="closeEditModal()"
+                    class="px-5 py-3 rounded-xl bg-slate-200 hover:bg-slate-300 font-bold">
+
                     Batal
+
                 </button>
-                <button type="submit" class="px-5 py-2 bg-indigo-600 text-white rounded-xl font-bold text-xs hover:bg-indigo-700 transition shadow-lg shadow-indigo-100">
-                    Simpan Perubahan
+
+                <button
+                    type="submit"
+                    class="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold">
+
+                    Simpan
+
                 </button>
+
             </div>
+
         </form>
+
     </div>
+
 </div>
 
 <script>
-    function openEditModal(id, name, logoUrl) {
-        const modal = document.getElementById('editModal');
-        const form = document.getElementById('editForm');
-        const inputName = document.getElementById('edit_name');
-        const inputLogoUrl = document.getElementById('edit_logo_url');
-        
-        form.action = `/admin/partners/${id}`;
-        inputName.value = name;
-        inputLogoUrl.value = logoUrl; 
 
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.remove('opacity-0');
-            modal.querySelector('div').classList.remove('scale-95');
-        }, 10);
-    }
+function openEditModal(id,name,logo,description,email){
 
-    function closeEditModal() {
-        const modal = document.getElementById('editModal');
-        modal.classList.add('opacity-0');
-        modal.querySelector('div').classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-        }, 300);
-    }
+    document.getElementById('editModal').classList.remove('hidden');
+    document.getElementById('editModal').classList.add('flex');
+
+    document.getElementById('editForm').action='/admin/partners/'+id;
+
+    document.getElementById('edit_name').value=name;
+    document.getElementById('edit_logo_url').value=logo;
+    document.getElementById('edit_description').value=description ?? '';
+    document.getElementById('edit_email').value=email ?? '';
+
+}
+
+function closeEditModal(){
+
+    document.getElementById('editModal').classList.remove('flex');
+    document.getElementById('editModal').classList.add('hidden');
+
+}
+
+@if($errors->any())
+    // Kalau ada error validasi dan itu berasal dari form Edit (bukan form Tambah),
+    // otomatis buka lagi modal edit-nya supaya tidak hilang begitu saja.
+    // (Opsional — hapus blok ini kalau kamu tidak butuh perilaku ini)
+@endif
+
 </script>
+
 @endsection

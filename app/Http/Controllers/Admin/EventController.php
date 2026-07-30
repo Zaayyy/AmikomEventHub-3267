@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Event;
+use App\Models\Partner;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class EventController extends Controller
@@ -13,7 +15,12 @@ class EventController extends Controller
     //mengambil data event beserta data kategori yang berelasi
     public function index()
     {
-        $events = Event::with('category')->latest()->paginate(10);
+        $events = Event::with(['category', 'partner'])
+            ->when(Auth::user()->partner_id, function ($query, $partnerId) {
+                $query->where('partner_id', $partnerId);
+            })
+            ->latest()
+            ->paginate(10);
         
         return view('admin.events.index', compact('events'));
     }
@@ -24,7 +31,9 @@ class EventController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('admin.events.create', compact('categories'));
+        $partners = $this->availablePartners();
+
+        return view('admin.events.create', compact('categories', 'partners'));
     }
 
     /**
@@ -40,6 +49,8 @@ class EventController extends Controller
             $data['poster_path'] = $request->file('poster')->store('posters', 'public');
         }
 
+        $data['partner_id'] = $this->resolvedPartnerId($data['partner_id']);
+
         Event::create($data);
 
         return redirect()->route('admin.events.index')->with('success', 'Data Event berhasil ditambahkan.');
@@ -50,8 +61,12 @@ class EventController extends Controller
      */
     public function edit(Event $event)
     {
+        $this->authorizePartnerEvent($event);
+
         $categories = Category::all();
-        return view('admin.events.edit', compact('event', 'categories'));
+        $partners = $this->availablePartners();
+
+        return view('admin.events.edit', compact('event', 'categories', 'partners'));
     }
 
     /**
@@ -59,6 +74,8 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event)
     {
+        $this->authorizePartnerEvent($event);
+
         $data = $request->validate($this->rules(), $this->messages());
 
         unset($data['poster']);
@@ -71,6 +88,8 @@ class EventController extends Controller
             $data['poster_path'] = $request->file('poster')->store('posters', 'public');
         }
 
+        $data['partner_id'] = $this->resolvedPartnerId($data['partner_id']);
+
         $event->update($data);
 
         return redirect()->route('admin.events.index')->with('success', 'Rincian data event berhasil diperbarui.');
@@ -81,6 +100,8 @@ class EventController extends Controller
      */
     public function destroy(Event $event)
     {
+        $this->authorizePartnerEvent($event);
+
         if ($event->poster_path) {
             Storage::disk('public')->delete($event->poster_path);
         }
@@ -94,6 +115,7 @@ class EventController extends Controller
     {
         return [
             'category_id' => 'required|exists:categories,id',
+            'partner_id'  => 'required|exists:partners,id',
             'title'       => 'required|string|max:255',
             'description' => 'nullable|string',
             'date'        => 'required|date',
@@ -109,6 +131,8 @@ class EventController extends Controller
         return [
             'category_id.required' => 'Kategori wajib dipilih.',
             'category_id.exists'   => 'Kategori tidak valid.',
+            'partner_id.required'  => 'Penyelenggara wajib dipilih.',
+            'partner_id.exists'    => 'Penyelenggara tidak valid.',
             'title.required'       => 'Judul event wajib diisi.',
             'title.max'            => 'Judul event maksimal 255 karakter.',
             'date.required'        => 'Tanggal event wajib diisi.',
@@ -124,5 +148,27 @@ class EventController extends Controller
             'poster.mimes'         => 'Poster harus berformat jpg, jpeg, png, atau webp.',
             'poster.max'           => 'Ukuran poster maksimal 2 MB.',
         ];
+    }
+
+    private function availablePartners()
+    {
+        return Partner::query()
+            ->when(Auth::user()->partner_id, function ($query, $partnerId) {
+                $query->where('id', $partnerId);
+            })
+            ->orderBy('name')
+            ->get();
+    }
+
+    private function resolvedPartnerId(int|string $partnerId): int|string
+    {
+        return Auth::user()->partner_id ?: $partnerId;
+    }
+
+    private function authorizePartnerEvent(Event $event): void
+    {
+        if (Auth::user()->partner_id && (int) $event->partner_id !== (int) Auth::user()->partner_id) {
+            abort(403, 'Event ini bukan milik penyelenggara Anda.');
+        }
     }
 }

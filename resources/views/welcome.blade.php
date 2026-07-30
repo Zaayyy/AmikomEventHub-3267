@@ -10,14 +10,53 @@
         <p class="text-lg text-slate-500 max-w-lg leading-relaxed">
             Mulai dari seminar, workshop, hingga sharing session seputar dunia perkuliahan dan teknologi, semua bisa kamu akses dengan mudah di sini.
         </p>
-        <div class="flex gap-4">
-            <a href="#events" class="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-200 hover:scale-105 transition-transform">
-                Mulai Jelajah
-            </a>
-            <a href="#" class="px-8 py-4 border-2 border-slate-200 rounded-2xl font-bold text-lg hover:border-indigo-600 hover:text-indigo-600 transition">
-                Cara Pesan
-            </a>
+        <div class="flex gap-4 items-center flex-wrap">
+
+    <a href="#events"
+       class="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-200 hover:scale-105 transition-transform">
+        Mulai Jelajah
+    </a>
+
+    @guest
+        <a href="{{ route('google.redirect') }}"
+   class="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-lg shadow-xl shadow-indigo-200 hover:scale-105 transition-transform">
+    Login dengan Google
+</a>
+    @endguest
+
+    @auth
+        <div class="flex items-center gap-3 bg-white rounded-2xl px-4 py-2 shadow">
+
+            @if(auth()->user()->avatar)
+                <img src="{{ auth()->user()->avatar }}"
+                     class="w-10 h-10 rounded-full"
+                     alt="Avatar">
+            @endif
+
+            <div>
+                <p class="font-bold text-slate-800">
+                    {{ auth()->user()->name }}
+                </p>
+
+                <p class="text-xs text-slate-500">
+                    {{ auth()->user()->email }}
+                </p>
+            </div>
+
+            <form action="{{ route('user.logout') }}" method="POST">
+                @csrf
+
+                <button
+                    class="ml-2 text-red-500 hover:text-red-700 font-semibold">
+                    Logout
+                </button>
+
+            </form>
+
         </div>
+    @endauth
+
+</div>
     </div>
     <div class="flex-1 relative">
         <div class="absolute -top-10 -left-10 w-64 h-64 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
@@ -144,9 +183,40 @@
             Didukung Oleh Mitra Terbaik
         </h2>
 
-        <p class="text-slate-500 max-w-2xl mx-auto mb-12">
+        <p class="text-slate-500 max-w-2xl mx-auto mb-10">
             Berbagai perusahaan dan komunitas terpercaya yang mendukung
             keberlangsungan event di AmikomEventHub.
+        </p>
+
+        <div class="max-w-2xl mx-auto mb-12 bg-white border border-slate-100 rounded-[2rem] shadow-sm p-12 flex flex-col items-center text-center">
+
+            <div class="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-6">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </div>
+
+            <h3 class="text-2xl font-extrabold text-slate-900 mb-3">
+                Punya organisasi yang ingin bekerja sama dengan kami?
+            </h3>
+
+            <p class="text-slate-500 max-w-md mx-auto mb-8 leading-relaxed">
+                Daftarkan organisasi Anda dan jadilah Official Partner AmikomEventHub.
+                Proses pengajuan cepat dan akan direview langsung oleh tim kami.
+            </p>
+
+            <a href="{{ route('partner-registration.create') }}"
+               class="inline-flex items-center gap-2 px-8 py-4 bg-indigo-600 text-white rounded-2xl font-bold text-sm shadow-xl shadow-indigo-200 hover:bg-indigo-700 hover:scale-105 transition-transform">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                Daftarkan Organisasi
+            </a>
+
+        </div>
+
+        <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">
+            Partner Kami Saat Ini
         </p>
 
         <!-- Partner Grid -->
@@ -189,7 +259,7 @@
 
 <footer class="w-full bg-slate-900 text-slate-300 py-10">
     <div class="max-w-7xl mx-auto px-6 text-center text-sm">
-        <p>🎓 Aplikasi ini sekedar untuk bahan demo materi matakuliah <strong>Digital Bisnis</strong> di <strong>Universitas Amikom Yogyakarta</strong>.</p>
+        <p>Aplikasi ini sekedar untuk bahan demo materi matakuliah <strong>Digital Bisnis</strong> di <strong>Universitas Amikom Yogyakarta</strong>.</p>
         <p class="text-slate-500 mt-2">Demo Purpose Only &bull; 2026</p>
     </div>
 </footer>
