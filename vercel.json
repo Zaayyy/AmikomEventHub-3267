@@ -1,21 +1,28 @@
 {
     "version": 2,
-    "outputDirectory": "public",
     "framework": null,
     "functions": {
         "api/index.php": {
-            "runtime": "vercel-php@0.7.2",
-            "includeFiles": "{.env,artisan,app/**,bootstrap/**,config/**,database/**,public/**,resources/**,routes/**,storage/**,vendor/**}"
+            "runtime": "vercel-php@0.7.3",
+            "includeFiles": "**"
         }
     },
     "routes": [
         {
-            "src": "/assets/(.*)",
+            "src": "^/build/(.*)$",
+            "dest": "/build/$1"
+        },
+        {
+            "src": "^/assets/(.*)$",
             "dest": "/assets/$1"
         },
         {
-            "src": "/favicon.ico",
-            "dest": "/favicon.ico"
+            "src": "^/(favicon\\.ico|favicon\\.png|robots\\.txt)$",
+            "dest": "/$1"
+        },
+        {
+            "src": "^/(.+\\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map))$",
+            "dest": "/$1"
         },
         {
             "src": "/(.*)",
