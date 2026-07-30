@@ -1,70 +1,59 @@
 <?php
 
-// Show all errors for debugging (remove after fixing)
+// Show all errors for debugging
 ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
 
 define('LARAVEL_START', microtime(true));
 
-// Base path of the Laravel application
 $basePath = dirname(__DIR__);
 
-// Debug: Check if critical files exist
-$criticalFiles = [
-    'vendor/autoload.php',
-    'bootstrap/app.php',
-    'config/app.php',
-    '.env',
-];
-
-$missing = [];
-foreach ($criticalFiles as $file) {
-    if (!file_exists($basePath . '/' . $file)) {
-        $missing[] = $file;
+// Ensure /tmp directories for Vercel Serverless
+$storagePath = '/tmp/storage';
+foreach ([
+    $storagePath . '/framework/views',
+    $storagePath . '/framework/cache',
+    $storagePath . '/framework/sessions',
+    $storagePath . '/logs',
+    $storagePath . '/app/public',
+] as $dir) {
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0755, true);
     }
 }
 
-if (!empty($missing)) {
+// Setup SQLite in /tmp if using sqlite
+$dbFile = '/tmp/database.sqlite';
+if (!file_exists($dbFile)) {
+    @touch($dbFile);
+}
+putenv("DB_DATABASE={$dbFile}");
+$_ENV['DB_DATABASE'] = $dbFile;
+$_SERVER['DB_DATABASE'] = $dbFile;
+
+try {
+    // Autoload
+    require_once $basePath . '/vendor/autoload.php';
+
+    // Bootstrap Laravel
+    /** @var \Illuminate\Foundation\Application $app */
+    $app = require_once $basePath . '/bootstrap/app.php';
+
+    // Override storage path to /tmp/storage
+    $app->useStoragePath($storagePath);
+
+    // Handle Request
+    $request = Illuminate\Http\Request::capture();
+    $response = $app->handleRequest($request);
+    $response->send();
+} catch (\Throwable $e) {
     http_response_code(500);
-    header('Content-Type: application/json');
-    echo json_encode([
-        'error' => 'Missing critical files',
-        'basePath' => $basePath,
-        'missing' => $missing,
-        'dir_contents' => scandir($basePath),
-    ]);
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "SERVERLESS BOOTSTRAP ERROR:\n";
+    echo "Message: " . $e->getMessage() . "\n";
+    echo "File: " . $e->getFile() . ":" . $e->getLine() . "\n\n";
+    echo "Trace:\n" . $e->getTraceAsString();
     exit(1);
 }
 
-// Determine if the application is in maintenance mode...
-if (file_exists($maintenance = $basePath . '/storage/framework/maintenance.php')) {
-    require $maintenance;
-}
-
-// Register the Composer autoloader...
-require $basePath . '/vendor/autoload.php';
-
-// Bootstrap Laravel and handle the request...
-/** @var \Illuminate\Foundation\Application $app */
-$app = require_once $basePath . '/bootstrap/app.php';
-
-// Vercel serverless: filesystem is read-only except /tmp
-// Override storage paths to use /tmp
-$app->useStoragePath('/tmp/storage');
-
-// Ensure required directories exist in /tmp
-foreach ([
-    '/tmp/storage/framework/views',
-    '/tmp/storage/framework/cache',
-    '/tmp/storage/framework/sessions',
-    '/tmp/storage/logs',
-] as $dir) {
-    if (!is_dir($dir)) {
-        mkdir($dir, 0755, true);
-    }
-}
-
-$app->handleRequest(
-    Illuminate\Http\Request::capture()
-);
