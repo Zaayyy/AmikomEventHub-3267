@@ -71,25 +71,8 @@ $app->register(\Illuminate\Filesystem\FilesystemServiceProvider::class);
 $app->register(\Illuminate\View\ViewServiceProvider::class);
 
 // Handle Request
-try {
-    $request = Illuminate\Http\Request::capture();
-    $response = $app->handleRequest($request);
-    $response->send();
-} catch (\Throwable $e) {
-    error_log((string)$e);
-    if (getenv('APP_DEBUG') === 'true' || $_ENV['APP_DEBUG'] ?? false) {
-        http_response_code(500);
-        header('Content-Type: application/json');
-        echo json_encode([
-            'error' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine(),
-            'trace' => explode("\n", $e->getTraceAsString()),
-        ]);
-        exit;
-    }
-    throw $e;
-}
+$request = Illuminate\Http\Request::capture();
+$app->handleRequest($request);
 
 
 

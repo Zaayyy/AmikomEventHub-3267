@@ -27,18 +27,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Throwable $e) {
-            return response()->make(
-                "<div style='font-family:sans-serif;padding:30px;max-width:900px;margin:0 auto;'>" .
-                "<h1 style='color:#e53e3e;'>Application Error (500)</h1>" .
-                "<h2 style='color:#2d3748;'>" . htmlspecialchars($e->getMessage() ?: get_class($e)) . "</h2>" .
-                "<p><strong>File:</strong> " . htmlspecialchars($e->getFile()) . " <strong>Line:</strong> " . $e->getLine() . "</p>" .
-                "<h3 style='margin-top:20px;'>Stack Trace:</h3>" .
-                "<pre style='background:#edf2f7;padding:15px;border-radius:8px;overflow:auto;font-size:13px;line-height:1.5;'>" . htmlspecialchars($e->getTraceAsString()) . "</pre>" .
-                "</div>",
-                500
-            );
-        });
+        //
     })
     ->create();
 
