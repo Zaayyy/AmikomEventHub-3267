@@ -45,6 +45,11 @@ require_once $basePath . '/vendor/autoload.php';
 /** @var \Illuminate\Foundation\Application $app */
 $app = require_once $basePath . '/bootstrap/app.php';
 
+// Register core providers explicitly for Vercel Serverless
+$app->register(\Illuminate\Events\EventServiceProvider::class);
+$app->register(\Illuminate\Filesystem\FilesystemServiceProvider::class);
+$app->register(\Illuminate\View\ViewServiceProvider::class);
+
 // Handle Request
 try {
     $request = Illuminate\Http\Request::capture();
