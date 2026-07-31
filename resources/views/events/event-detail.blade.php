@@ -98,8 +98,24 @@
         {{-- Poster (kiri, diam) --}}
         <div class="event-poster-col w-full max-w-sm mx-auto lg:mx-0 lg:w-[280px] xl:w-[300px] lg:shrink-0">
             <div class="event-poster-sticky">
+                @php
+                    $eventPosters = [
+                        1 => 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+                        2 => 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
+                        3 => 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=800&q=80',
+                        4 => 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80',
+                        5 => 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+                        6 => 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80',
+                        7 => 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80',
+                        8 => 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80',
+                        9 => 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=800&q=80',
+                    ];
+                    $detailPoster = ($event->poster_path && \Storage::disk('public')->exists($event->poster_path))
+                        ? asset('storage/' . $event->poster_path)
+                        : ($eventPosters[$event->id] ?? 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80');
+                @endphp
                 <img
-                    src="{{ $event->poster_path ? asset('storage/' . $event->poster_path) : asset('assets/concert.png') }}"
+                    src="{{ $detailPoster }}"
                     alt="Poster {{ $event->title }}"
                     class="w-full aspect-[3/4] object-cover rounded-3xl border-4 border-white shadow-xl"
                 >

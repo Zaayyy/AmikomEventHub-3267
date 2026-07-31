@@ -64,10 +64,20 @@
         
         @php
             $closestEvent = $events->first();
-            $defaultHeroImage = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80';
+            $eventPosters = [
+                1 => 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+                2 => 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80',
+                3 => 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?auto=format&fit=crop&w=800&q=80',
+                4 => 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80',
+                5 => 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+                6 => 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=800&q=80',
+                7 => 'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=800&q=80',
+                8 => 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=800&q=80',
+                9 => 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?auto=format&fit=crop&w=800&q=80',
+            ];
             $heroImage = ($closestEvent && $closestEvent->poster_path && \Storage::disk('public')->exists($closestEvent->poster_path)) 
                 ? asset('storage/' . $closestEvent->poster_path) 
-                : $defaultHeroImage;
+                : ($closestEvent ? ($eventPosters[$closestEvent->id] ?? 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80') : 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80');
         @endphp
         
         <div class="relative overflow-hidden aspect-[3/4] rounded-3xl shadow-2xl border border-white/20 group">
@@ -135,15 +145,9 @@
                 {{-- Poster Area --}}
                 <div class="relative overflow-hidden aspect-video">
                     @php
-                        $eventFallbackImages = [
-                            'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80',
-                            'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=600&q=80',
-                            'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=600&q=80',
-                            'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80',
-                        ];
                         $cardImage = ($event->poster_path && \Storage::disk('public')->exists($event->poster_path))
                             ? asset('storage/' . $event->poster_path)
-                            : $eventFallbackImages[$event->id % count($eventFallbackImages)];
+                            : ($eventPosters[$event->id] ?? 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80');
                     @endphp
                     <img src="{{ $cardImage }}" 
                          alt="{{ $event->title }}" 
@@ -251,13 +255,22 @@
                     title="{{ $partner->name }}"
                 >
 
+                    @php
+                        $partnerLogos = [
+                            'Universitas Amikom Yogyakarta' => 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSXzAOh5RU1VRgDxIzxvrpAIqy3Mp6xMfGqD9TyrvQBot_HiZkWVG9MoZ8&s=10',
+                            'PT. Bank Central Asia' => 'https://images.seeklogo.com/logo-png/23/1/bca-bank-logo-png_seeklogo-232742.png',
+                            'HIMASI' => 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlI_fhJZkxmpRaXlBxy4mHdyB_DXIAYqlpUfD0OgypuYiUHbAdpQxRazzu&s=10',
+                            'PT. PARAGON' => 'https://assets-a1.kompasiana.com/items/album/2025/06/22/paragon-6857a62aed6415524902f1c3.jpg',
+                            'Google Indonesia' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/800px-Google_2015_logo.svg.png',
+                            'Tokopedia' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Tokopedia_2014_logo.svg/800px-Tokopedia_2014_logo.svg.png',
+                        ];
+                        $logoSrc = $partnerLogos[$partner->name] ?? (str_contains($partner->logo_url, '127.0.0.1') ? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80' : $partner->logo_url);
+                    @endphp
+
                     <img 
-                        src="{{ $partner->logo_url }}"
+                        src="{{ $logoSrc }}"
                         alt="Logo {{ $partner->name }}"
-                        class="max-h-16 max-w-full object-contain 
-                               grayscale opacity-80 
-                               group-hover:grayscale-0 group-hover:opacity-100 
-                               transition duration-300"
+                        class="max-h-16 max-w-full object-contain hover:scale-110 transition duration-300"
                     >
 
                 </div>
