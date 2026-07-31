@@ -38,22 +38,23 @@ class DashboardController extends Controller
 
         $currentYear = now()->year;
 
-        $monthlyEventsRaw = $this->eventQuery()
-            ->selectRaw('MONTH(date) as month_number, COUNT(*) as total')
+        $eventsThisYear = $this->eventQuery()
             ->whereYear('date', $currentYear)
-            ->groupBy('month_number')
-            ->orderBy('month_number')
             ->get();
+
+        $monthlyEventsRaw = $eventsThisYear->groupBy(function ($event) {
+            return (int) \Carbon\Carbon::parse($event->date)->format('n');
+        });
 
         // Isi semua 12 bulan (Jan-Des), termasuk yang belum punya event,
         // supaya grafik selalu menampilkan satu tahun penuh.
         $monthlyEvents = collect(range(1, 12))->map(function ($month) use ($monthlyEventsRaw, $currentYear) {
-            $match = $monthlyEventsRaw->firstWhere('month_number', $month);
+            $group = $monthlyEventsRaw->get($month);
 
             return (object) [
                 'month_number' => $month,
                 'month_name' => \Carbon\Carbon::createFromDate($currentYear, $month, 1)->format('M'),
-                'total' => $match->total ?? 0,
+                'total' => $group ? $group->count() : 0,
             ];
         });
 
