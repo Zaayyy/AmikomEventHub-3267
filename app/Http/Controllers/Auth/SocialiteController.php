@@ -17,7 +17,11 @@ class SocialiteController extends Controller
 
     public function callback()
     {
-        $googleUser = Socialite::driver('google')->user();
+        try {
+            $googleUser = Socialite::driver('google')->user();
+        } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
+            $googleUser = Socialite::driver('google')->stateless()->user();
+        }
 
         $user = User::where('email', $googleUser->getEmail())->first();
 
