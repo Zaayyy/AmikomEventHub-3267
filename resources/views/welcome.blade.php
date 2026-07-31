@@ -261,8 +261,8 @@
                             'PT. Bank Central Asia' => 'https://images.seeklogo.com/logo-png/23/1/bca-bank-logo-png_seeklogo-232742.png',
                             'HIMASI' => 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlI_fhJZkxmpRaXlBxy4mHdyB_DXIAYqlpUfD0OgypuYiUHbAdpQxRazzu&s=10',
                             'PT. PARAGON' => 'https://assets-a1.kompasiana.com/items/album/2025/06/22/paragon-6857a62aed6415524902f1c3.jpg',
-                            'Google' => 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x91dp.png',
-                            'Tokopedia' => 'https://images.seeklogo.com/logo-png/33/2/tokopedia-logo-png_seeklogo-335607.png',
+                            'Google' => asset('assets/logos/google.svg'),
+                            'Tokopedia' => asset('assets/logos/tokopedia.svg'),
                         ];
 
                         $partnerName = trim($partner->name);
