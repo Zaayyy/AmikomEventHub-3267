@@ -19,8 +19,11 @@ foreach ([
 }
 
 putenv("APP_STORAGE_PATH={$storagePath}");
+putenv("VIEW_COMPILED_PATH={$storagePath}/framework/views");
 $_ENV['APP_STORAGE_PATH'] = $storagePath;
+$_ENV['VIEW_COMPILED_PATH'] = "{$storagePath}/framework/views";
 $_SERVER['APP_STORAGE_PATH'] = $storagePath;
+$_SERVER['VIEW_COMPILED_PATH'] = "{$storagePath}/framework/views";
 
 // Setup SQLite in /tmp by copying pre-seeded database if present
 $dbFile = '/tmp/database.sqlite';
@@ -43,9 +46,25 @@ require_once $basePath . '/vendor/autoload.php';
 $app = require_once $basePath . '/bootstrap/app.php';
 
 // Handle Request
-$request = Illuminate\Http\Request::capture();
-$response = $app->handleRequest($request);
-$response->send();
+try {
+    $request = Illuminate\Http\Request::capture();
+    $response = $app->handleRequest($request);
+    $response->send();
+} catch (\Throwable $e) {
+    error_log((string)$e);
+    if (getenv('APP_DEBUG') === 'true' || $_ENV['APP_DEBUG'] ?? false) {
+        http_response_code(500);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'error' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
+            'trace' => explode("\n", $e->getTraceAsString()),
+        ]);
+        exit;
+    }
+    throw $e;
+}
 
 
 
