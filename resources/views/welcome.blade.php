@@ -64,15 +64,24 @@
         
         @php
             $closestEvent = $events->first();
-            $dummyImage = 'https://placehold.co/800x1000/e2e8f0/94a3b8?text=Poster+Belum+Tersedia';
-            $heroImage = $closestEvent && $closestEvent->poster_path ? asset('storage/' . $closestEvent->poster_path) : $dummyImage;
+            $defaultHeroImage = 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80';
+            $heroImage = ($closestEvent && $closestEvent->poster_path && \Storage::disk('public')->exists($closestEvent->poster_path)) 
+                ? asset('storage/' . $closestEvent->poster_path) 
+                : $defaultHeroImage;
         @endphp
         
-        <div class="relative overflow-hidden aspect-[3/4]">
-    <img src="{{ ($closestEvent && $closestEvent->poster_path && \Storage::disk('public')->exists($closestEvent->poster_path)) ? asset('storage/' . $closestEvent->poster_path) : 'https://placehold.co/400x600?text=Hero+Poster' }}" 
-         alt="{{ $closestEvent->title ?? 'Poster Event' }}" 
-         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-</div>
+        <div class="relative overflow-hidden aspect-[3/4] rounded-3xl shadow-2xl border border-white/20 group">
+            <img src="{{ $heroImage }}" 
+                 alt="{{ $closestEvent->title ?? 'Poster Event' }}" 
+                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+            @if($closestEvent)
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent flex flex-col justify-end p-8 text-white">
+                    <span class="px-3 py-1 bg-indigo-600 rounded-lg text-xs font-bold uppercase w-max mb-2 shadow-lg">Featured Event</span>
+                    <h3 class="text-2xl font-bold leading-tight mb-1">{{ $closestEvent->title }}</h3>
+                    <p class="text-xs text-slate-300 font-medium">{{ $closestEvent->date->format('d F Y') }}</p>
+                </div>
+            @endif
+        </div>
 
         <div class="absolute -bottom-6 -left-6 glass p-6 rounded-2xl shadow-xl z-20 border border-white">
             <div class="flex items-center gap-4">
@@ -125,7 +134,18 @@
                 
                 {{-- Poster Area --}}
                 <div class="relative overflow-hidden aspect-video">
-                    <img src="{{ $event->poster_path ? asset('storage/' . $event->poster_path) : 'https://placehold.co/600x400/f1f5f9/94a3b8?text=Poster+Event' }}" 
+                    @php
+                        $eventFallbackImages = [
+                            'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=600&q=80',
+                            'https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=600&q=80',
+                            'https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&w=600&q=80',
+                            'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=600&q=80',
+                        ];
+                        $cardImage = ($event->poster_path && \Storage::disk('public')->exists($event->poster_path))
+                            ? asset('storage/' . $event->poster_path)
+                            : $eventFallbackImages[$event->id % count($eventFallbackImages)];
+                    @endphp
+                    <img src="{{ $cardImage }}" 
                          alt="{{ $event->title }}" 
                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                     
