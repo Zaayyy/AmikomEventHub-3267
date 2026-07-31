@@ -22,7 +22,6 @@ putenv("APP_STORAGE_PATH={$storagePath}");
 putenv("VIEW_COMPILED_PATH={$storagePath}/framework/views");
 putenv("APP_PACKAGES_CACHE={$storagePath}/packages.php");
 putenv("APP_SERVICES_CACHE={$storagePath}/services.php");
-putenv("APP_CONFIG_CACHE={$storagePath}/config.php");
 putenv("APP_ROUTES_CACHE={$storagePath}/routes.php");
 putenv("APP_EVENTS_CACHE={$storagePath}/events.php");
 
@@ -30,7 +29,6 @@ $_ENV['APP_STORAGE_PATH'] = $storagePath;
 $_ENV['VIEW_COMPILED_PATH'] = "{$storagePath}/framework/views";
 $_ENV['APP_PACKAGES_CACHE'] = "{$storagePath}/packages.php";
 $_ENV['APP_SERVICES_CACHE'] = "{$storagePath}/services.php";
-$_ENV['APP_CONFIG_CACHE'] = "{$storagePath}/config.php";
 $_ENV['APP_ROUTES_CACHE'] = "{$storagePath}/routes.php";
 $_ENV['APP_EVENTS_CACHE'] = "{$storagePath}/events.php";
 
@@ -38,9 +36,10 @@ $_SERVER['APP_STORAGE_PATH'] = $storagePath;
 $_SERVER['VIEW_COMPILED_PATH'] = "{$storagePath}/framework/views";
 $_SERVER['APP_PACKAGES_CACHE'] = "{$storagePath}/packages.php";
 $_SERVER['APP_SERVICES_CACHE'] = "{$storagePath}/services.php";
-$_SERVER['APP_CONFIG_CACHE'] = "{$storagePath}/config.php";
 $_SERVER['APP_ROUTES_CACHE'] = "{$storagePath}/routes.php";
 $_SERVER['APP_EVENTS_CACHE'] = "{$storagePath}/events.php";
+
+@unlink("{$storagePath}/config.php");
 
 // Setup SQLite in /tmp by copying pre-seeded database if present
 $dbFile = '/tmp/database.sqlite';

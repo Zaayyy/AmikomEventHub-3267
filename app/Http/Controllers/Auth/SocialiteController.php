@@ -12,10 +12,10 @@ class SocialiteController extends Controller
 {
     private function getGoogleProvider()
     {
-        $clientId = trim(env('GOOGLE_CLIENT_ID') ?: config('services.google.client_id') ?: '');
-        $clientSecret = trim(env('GOOGLE_CLIENT_SECRET') ?: config('services.google.client_secret') ?: '');
+        $clientId = trim(getenv('GOOGLE_CLIENT_ID') ?: ($_ENV['GOOGLE_CLIENT_ID'] ?? '') ?: ($_SERVER['GOOGLE_CLIENT_ID'] ?? '') ?: (config('services.google.client_id') ?? ''));
+        $clientSecret = trim(getenv('GOOGLE_CLIENT_SECRET') ?: ($_ENV['GOOGLE_CLIENT_SECRET'] ?? '') ?: ($_SERVER['GOOGLE_CLIENT_SECRET'] ?? '') ?: (config('services.google.client_secret') ?? ''));
         
-        $envRedirect = trim(env('GOOGLE_REDIRECT_URI') ?: config('services.google.redirect') ?: '');
+        $envRedirect = trim(getenv('GOOGLE_REDIRECT_URI') ?: ($_ENV['GOOGLE_REDIRECT_URI'] ?? '') ?: ($_SERVER['GOOGLE_REDIRECT_URI'] ?? '') ?: (config('services.google.redirect') ?? ''));
         if ($envRedirect && !str_contains($envRedirect, '/auth/google/callback')) {
             $envRedirect = rtrim($envRedirect, '/') . '/auth/google/callback';
         }
