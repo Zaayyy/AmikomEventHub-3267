@@ -44,6 +44,7 @@ $app = Application::configure(basePath: dirname(__DIR__))
 
 if (is_dir('/tmp')) {
     $app->useStoragePath('/tmp/storage');
+    $app->addAbsoluteCachePathPrefix('/tmp');
 }
 
 return $app;
