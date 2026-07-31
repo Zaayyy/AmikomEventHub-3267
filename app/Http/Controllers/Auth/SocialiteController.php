@@ -12,12 +12,14 @@ class SocialiteController extends Controller
 {
     public function redirect()
     {
-        return Socialite::driver('google')->stateless()->redirect();
+        $redirectUrl = env('GOOGLE_REDIRECT_URI') ?: url('/auth/google/callback');
+        return Socialite::driver('google')->redirectUrl($redirectUrl)->stateless()->redirect();
     }
 
     public function callback()
     {
-        $googleUser = Socialite::driver('google')->stateless()->user();
+        $redirectUrl = env('GOOGLE_REDIRECT_URI') ?: url('/auth/google/callback');
+        $googleUser = Socialite::driver('google')->redirectUrl($redirectUrl)->stateless()->user();
 
         $user = User::where('email', $googleUser->getEmail())->first();
 
