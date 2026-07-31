@@ -10,16 +10,30 @@ use Laravel\Socialite\Facades\Socialite;
 
 class SocialiteController extends Controller
 {
+    private function getGoogleProvider()
+    {
+        $clientId = trim(env('GOOGLE_CLIENT_ID') ?: config('services.google.client_id') ?: '');
+        $clientSecret = trim(env('GOOGLE_CLIENT_SECRET') ?: config('services.google.client_secret') ?: '');
+        $redirectUrl = trim(env('GOOGLE_REDIRECT_URI') ?: config('services.google.redirect') ?: url('/auth/google/callback'));
+
+        return Socialite::buildProvider(
+            \Laravel\Socialite\Two\GoogleProvider::class,
+            [
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+                'redirect' => $redirectUrl,
+            ]
+        )->stateless();
+    }
+
     public function redirect()
     {
-        $redirectUrl = env('GOOGLE_REDIRECT_URI') ?: url('/auth/google/callback');
-        return Socialite::driver('google')->redirectUrl($redirectUrl)->stateless()->redirect();
+        return $this->getGoogleProvider()->redirect();
     }
 
     public function callback()
     {
-        $redirectUrl = env('GOOGLE_REDIRECT_URI') ?: url('/auth/google/callback');
-        $googleUser = Socialite::driver('google')->redirectUrl($redirectUrl)->stateless()->user();
+        $googleUser = $this->getGoogleProvider()->user();
 
         $user = User::where('email', $googleUser->getEmail())->first();
 
