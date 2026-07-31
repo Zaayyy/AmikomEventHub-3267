@@ -14,7 +14,12 @@ class SocialiteController extends Controller
     {
         $clientId = trim(env('GOOGLE_CLIENT_ID') ?: config('services.google.client_id') ?: '');
         $clientSecret = trim(env('GOOGLE_CLIENT_SECRET') ?: config('services.google.client_secret') ?: '');
-        $redirectUrl = trim(env('GOOGLE_REDIRECT_URI') ?: config('services.google.redirect') ?: url('/auth/google/callback'));
+        
+        $envRedirect = trim(env('GOOGLE_REDIRECT_URI') ?: config('services.google.redirect') ?: '');
+        if ($envRedirect && !str_contains($envRedirect, '/auth/google/callback')) {
+            $envRedirect = rtrim($envRedirect, '/') . '/auth/google/callback';
+        }
+        $redirectUrl = $envRedirect ?: url('/auth/google/callback');
 
         return Socialite::buildProvider(
             \Laravel\Socialite\Two\GoogleProvider::class,
