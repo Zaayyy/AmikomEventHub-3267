@@ -12,9 +12,21 @@ class SocialiteController extends Controller
 {
     private function getGoogleProvider()
     {
-        $clientId = trim(getenv('GOOGLE_CLIENT_ID') ?: ($_ENV['GOOGLE_CLIENT_ID'] ?? '') ?: ($_SERVER['GOOGLE_CLIENT_ID'] ?? '') ?: (config('services.google.client_id') ?? ''));
-        $clientSecret = trim(getenv('GOOGLE_CLIENT_SECRET') ?: ($_ENV['GOOGLE_CLIENT_SECRET'] ?? '') ?: ($_SERVER['GOOGLE_CLIENT_SECRET'] ?? '') ?: (config('services.google.client_secret') ?? ''));
-        
+        $getEnvVal = function ($key) {
+            $val = getenv($key);
+            if ($val !== false && trim((string)$val) !== '') return trim((string)$val);
+            if (isset($_SERVER[$key]) && trim((string)$_SERVER[$key]) !== '') return trim((string)$_SERVER[$key]);
+            if (isset($_ENV[$key]) && trim((string)$_ENV[$key]) !== '') return trim((string)$_ENV[$key]);
+            $cfgKey = strtolower(str_replace('GOOGLE_', '', $key));
+            $cfg = config("services.google.{$cfgKey}");
+            if ($cfg && trim((string)$cfg) !== '') return trim((string)$cfg);
+            return '';
+        };
+
+        $clientId = $getEnvVal('GOOGLE_CLIENT_ID');
+        $clientSecret = $getEnvVal('GOOGLE_CLIENT_SECRET');
+        $envRedirect = $getEnvVal('GOOGLE_REDIRECT_URI');
+
         if (empty($clientId) || empty($clientSecret)) {
             throw new \RuntimeException(
                 "Konfigurasi Google OAuth belum siap di Vercel. " .
@@ -24,7 +36,6 @@ class SocialiteController extends Controller
             );
         }
 
-        $envRedirect = trim(getenv('GOOGLE_REDIRECT_URI') ?: ($_ENV['GOOGLE_REDIRECT_URI'] ?? '') ?: ($_SERVER['GOOGLE_REDIRECT_URI'] ?? '') ?: (config('services.google.redirect') ?? ''));
         if ($envRedirect && !str_contains($envRedirect, '/auth/google/callback')) {
             $envRedirect = rtrim($envRedirect, '/') . '/auth/google/callback';
         }
