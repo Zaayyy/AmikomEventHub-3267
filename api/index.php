@@ -44,13 +44,14 @@ $_SERVER['APP_EVENTS_CACHE'] = "{$storagePath}/events.php";
 
 // Setup SQLite in /tmp by copying pre-seeded database if present
 $dbFile = '/tmp/database.sqlite';
-if (!file_exists($dbFile)) {
-    $seededDb = $basePath . '/database/database.sqlite';
-    if (file_exists($seededDb)) {
+$seededDb = $basePath . '/database/database.sqlite';
+
+if (file_exists($seededDb)) {
+    if (!file_exists($dbFile) || filemtime($seededDb) > filemtime($dbFile)) {
         @copy($seededDb, $dbFile);
-    } else {
-        @touch($dbFile);
     }
+} else if (!file_exists($dbFile)) {
+    @touch($dbFile);
 }
 putenv("DB_DATABASE={$dbFile}");
 $_ENV['DB_DATABASE'] = $dbFile;

@@ -261,10 +261,27 @@
                             'PT. Bank Central Asia' => 'https://images.seeklogo.com/logo-png/23/1/bca-bank-logo-png_seeklogo-232742.png',
                             'HIMASI' => 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlI_fhJZkxmpRaXlBxy4mHdyB_DXIAYqlpUfD0OgypuYiUHbAdpQxRazzu&s=10',
                             'PT. PARAGON' => 'https://assets-a1.kompasiana.com/items/album/2025/06/22/paragon-6857a62aed6415524902f1c3.jpg',
-                            'Google Indonesia' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/800px-Google_2015_logo.svg.png',
+                            'Google' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/800px-Google_2015_logo.svg.png',
                             'Tokopedia' => 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Tokopedia_2014_logo.svg/800px-Tokopedia_2014_logo.svg.png',
                         ];
-                        $logoSrc = $partnerLogos[$partner->name] ?? (str_contains($partner->logo_url, '127.0.0.1') ? 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80' : $partner->logo_url);
+
+                        $partnerName = trim($partner->name);
+                        $logoSrc = null;
+
+                        foreach ($partnerLogos as $nameKey => $url) {
+                            if (stripos($partnerName, $nameKey) !== false || stripos($nameKey, $partnerName) !== false) {
+                                $logoSrc = $url;
+                                break;
+                            }
+                        }
+
+                        if (!$logoSrc) {
+                            if (str_contains($partner->logo_url, '127.0.0.1') || str_contains($partner->logo_url, 'partner-logo')) {
+                                $logoSrc = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80';
+                            } else {
+                                $logoSrc = $partner->logo_url;
+                            }
+                        }
                     @endphp
 
                     <img 
