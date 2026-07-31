@@ -27,7 +27,17 @@ $app = Application::configure(basePath: dirname(__DIR__))
     })
 
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->respond(function ($response, \Throwable $e) {
+            if (getenv('APP_DEBUG') === 'true' || env('APP_DEBUG') === true || config('app.debug')) {
+                return response()->json([
+                    'error_message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                    'trace' => explode("\n", $e->getTraceAsString()),
+                ], 500);
+            }
+            return $response;
+        });
     })
     ->create();
 
