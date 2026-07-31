@@ -12,16 +12,12 @@ class SocialiteController extends Controller
 {
     public function redirect()
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')->stateless()->redirect();
     }
 
     public function callback()
     {
-        try {
-            $googleUser = Socialite::driver('google')->user();
-        } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
-            $googleUser = Socialite::driver('google')->stateless()->user();
-        }
+        $googleUser = Socialite::driver('google')->stateless()->user();
 
         $user = User::where('email', $googleUser->getEmail())->first();
 
