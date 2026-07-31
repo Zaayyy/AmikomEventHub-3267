@@ -238,8 +238,8 @@ INSERT INTO `partners` (`id`, `name`, `logo_url`, `description`, `created_at`, `
 (2, 'PT. Bank Central Asia', 'https://images.seeklogo.com/logo-png/23/1/bca-bank-logo-png_seeklogo-232742.png', NULL, '2026-07-24 06:32:39', '2026-07-24 23:30:01'),
 (3, 'HIMASI', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlI_fhJZkxmpRaXlBxy4mHdyB_DXIAYqlpUfD0OgypuYiUHbAdpQxRazzu&s=10', 'Himpunan Mahasiswa Sistem Informasi Universitas Amikom Yogyakarta', '2026-07-25 23:22:35', '2026-07-25 23:22:35'),
 (4, 'PT. PARAGON', 'https://assets-a1.kompasiana.com/items/album/2025/06/22/paragon-6857a62aed6415524902f1c3.jpg', 'perusahaan manufaktur dan distributor kosmetik nasional terbesar di Indonesia', '2026-07-26 05:35:13', '2026-07-26 05:35:13'),
-(5, 'Google Indonesia', 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/800px-Google_2015_logo.svg.png', 'perusahaan teknologi raksasa asal Amerika Serikat yang terkenal sebagai mesin pencari internet terbesar di dunia', '2026-07-29 21:46:58', '2026-07-29 21:46:58'),
-(6, 'Tokopedia', 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Tokopedia_2014_logo.svg/800px-Tokopedia_2014_logo.svg.png', 'platform jual beli online', '2026-07-30 18:46:15', '2026-07-30 18:46:15');
+(5, 'Google Indonesia', 'https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x91dp.png', 'perusahaan teknologi raksasa asal Amerika Serikat yang terkenal sebagai mesin pencari internet terbesar di dunia', '2026-07-29 21:46:58', '2026-07-29 21:46:58'),
+(6, 'Tokopedia', 'https://images.seeklogo.com/logo-png/33/2/tokopedia-logo-png_seeklogo-335607.png', 'platform jual beli online', '2026-07-30 18:46:15', '2026-07-30 18:46:15');
 
 -- --------------------------------------------------------
 
